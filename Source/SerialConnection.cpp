@@ -9,45 +9,60 @@
 */
 
 #include "SerialConnection.h"
+#include "Control.h"
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-#define DELAY 0x1000
-
 SerialConnection::SerialConnection() : Thread("serial connection"),
-                                       ChangeBroadcaster(),
-                                       delayVal(0),
-                                       delayIsOn(false) {
+                                       ctrls{} {
   fd = serialOpen("/dev/ttyACM0", 115200);
   if (fd == -1) {
     std::cout << "Error opening device\n";
+    exit(EXIT_FAILURE);
   }
   wiringPiSetup();
 };
 
 SerialConnection::~SerialConnection() {
   serialClose(fd);
+  signalThreadShouldExit();
+};
+
+SerialConnection::SerialConnection(const SerialConnection& other) :
+  Thread("serial connection") {
+  fd = other.fd;
+  for (int i = 0; i < other.ctrls.size(); i++) {
+    ctrls.at(i) = other.ctrls.at(i);
+  }
 };
 
 void SerialConnection::run() {
   while (!threadShouldExit()) {
-    if (serialDataAvail(fd) >= 2) {
-      unsigned int input = serialGetchar(fd); // LSB
-      input |= (serialGetchar(fd) << 8);      // MSB
+    if (serialDataAvail(fd) > 0) {
+      const MessageManagerLock mml {Thread::getCurrentThread()};
 
-      recordUpdate(input);
+      if (!mml.lockWasGained()) {
+        return;
+      }
 
-      sendChangeMessage();
+      unsigned int serialOutput { 0 };
+
+      int lowerByte = serialGetchar(fd);
+      serialOutput = lowerByte;
+      int upperByte = serialGetchar(fd);
+      serialOutput |= (upperByte << 8);
+
+      int id = (serialOutput & 0xF000) >> 12;
+      int val = serialOutput & 0x3FF;
+      bool isOn = (serialOutput & (1 << 10)) > 0;
+
+      if (id < ctrls.size()) {
+        ctrls.at(id)->update(val, isOn);
+      }
     }
   }
 };
 
-void SerialConnection::recordUpdate(unsigned int input) {
-  auto inputType = input & 0xf000; // top 4 bits
-  auto inputValue = input & 0x3FF; // bottom 10 bits
-
-  if (inputType == DELAY) {
-    delayVal = inputValue;
-    delayIsOn = true;
-  }
+void SerialConnection::addControl(std::shared_ptr<Control> ctrl) {
+  ctrls.push_back(ctrl);
 };

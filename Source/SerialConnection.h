@@ -11,17 +11,17 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Control.h"
 
-class SerialConnection : public Thread,
-                         public ChangeBroadcaster
+class SerialConnection : public Thread
 {
  public:
   SerialConnection();
+  SerialConnection(const SerialConnection&);
   ~SerialConnection();
   void run() override;
-  unsigned int delayVal;
-  bool delayIsOn;
+  void addControl(std::shared_ptr<Control> ctrl);
  private:
-  void recordUpdate(unsigned int);
+  std::vector<std::shared_ptr<Control>> ctrls;
   int fd;
 };
