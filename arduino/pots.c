@@ -29,8 +29,8 @@ until its potentiometer value changes or it is turned off:
 #include "USART.h"
 #include "pots.h"
 
-const int POT_PINS[NUM_CTRLS] = { PINC0, PINC1 };
-const int BUTTON_PINS[NUM_CTRLS] = { PIND4, PIND5 };
+const uint8_t POT_PINS[NUM_CTRLS] = { PINC0, PINC1 };
+const uint8_t BUTTON_PINS[NUM_CTRLS] = { PIND4, PIND5 };
 
 struct _Button {
   uint8_t pin;
@@ -95,14 +95,14 @@ uint16_t readADC(uint8_t channel) {
 
 // Utilities
 
-uint8_t debounce(uint8_t pin) {
+bool debounce(uint8_t pin) {
   if (bit_is_clear(BUTTON_PIN, pin)) {      // button is pressed now
     _delay_us(DEBOUNCE_TIME);
     if (bit_is_clear(BUTTON_PIN, pin)) {    // still pressed
-      return (1);
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 void transmitCtrlValue(Control* ctrl) {
@@ -137,7 +137,7 @@ int main(void) {
   // -------- Main loop -------- //
   while (1) {
 
-    for (uint16_t i = 0; i < NUM_CTRLS; i++) {
+    for (uint8_t i = 0; i < NUM_CTRLS; i++) {
       Control* ctrl = controls[i];
 
       uint16_t currentPotValue = pollPot(ctrl->pot);
