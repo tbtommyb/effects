@@ -75,8 +75,8 @@ void initADC(void) {
   ADCSRA |= (1 << ADEN);                 // enable ADC
 }
 
-uint16_t readADC(uint8_t channel) {
-  ADMUX = (0xf0 & ADMUX) | channel;      // set bottom four bits (the multiplexer)
+uint16_t readADC(uint8_t pin) {
+  ADMUX = (MUX_MASK & ADMUX) | pin;      // set bottom five bits (the multiplexer)
   ADCSRA |= (1 << ADSC);                 // start conversion
   loop_until_bit_is_clear(ADCSRA, ADSC); // wait until conversion is done
   return (ADC);
@@ -138,7 +138,7 @@ int main(void) {
     for (uint8_t i = 0; i < NUM_CTRLS; i++) {
       Control* ctrl = controls[i];
 
-      uint16_t currentPotValue = readADC(ctrl->pot);
+      uint16_t currentPotValue = readADC(ctrl->pot->pin);
       if (abs(currentPotValue - ctrl->pot->val) > 2) {
       // Record new pot value
         ctrl->pot->val = currentPotValue;

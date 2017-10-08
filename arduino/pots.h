@@ -2,6 +2,7 @@
 #define CTRL_ON_BIT 10
 #define CTRL_OFF 0
 #define DEBOUNCE_TIME 1000  // microseconds
+#define MUX_MASK 0xe0
 
 #define ID_TAG(id) ((id) << 12)
 #define LOW_BYTE(w) ((uint8_t) ((w) & 0xff))
