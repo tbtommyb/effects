@@ -67,17 +67,6 @@ Control* newControl(uint16_t i) {
   return ctrl;
 }
 
-uint16_t pollPot(Pot* pot) {
-  return readADC(pot->pin);
-}
-
-bool isPressed(Button* btn) {
-  if (debounce(btn->pin)) {
-    return true;
-  }
-  return false;
-}
-
 // ADC
 
 void initADC(void) {
@@ -93,7 +82,7 @@ uint16_t readADC(uint8_t channel) {
   return (ADC);
 }
 
-// Utilities
+// Buttons
 
 bool debounce(uint8_t pin) {
   if (bit_is_clear(BUTTON_PIN, pin)) {      // button is pressed now
@@ -105,14 +94,23 @@ bool debounce(uint8_t pin) {
   return false;
 }
 
-void transmitCtrlValue(Control* ctrl) {
+bool isPressed(Button* btn) {
+  if (debounce(btn->pin)) {
+    return true;
+  }
+  return false;
+}
+
+// Transmitting messages
+
+void transmitOnMessage(Control* ctrl) {
   // Submit ctrl ID in top four, ON bit set and pot value in bottom ten
   uint16_t output = ID_TAG(ctrl->id) | (1 << CTRL_ON_BIT) | ctrl->pot->val;
   transmitWord(output);
 }
 
-void transmitCtrlOff(Control* ctrl) {
-  // Simply submit ctrl ID top four bits, rest empty
+void transmitOffMessage(Control* ctrl) {
+  // Submit ctrl ID top four bits, rest empty
   uint16_t output = ID_TAG(ctrl->id) | CTRL_OFF;
   transmitWord(output);
 }
@@ -140,12 +138,12 @@ int main(void) {
     for (uint8_t i = 0; i < NUM_CTRLS; i++) {
       Control* ctrl = controls[i];
 
-      uint16_t currentPotValue = pollPot(ctrl->pot);
+      uint16_t currentPotValue = readADC(ctrl->pot);
       if (abs(currentPotValue - ctrl->pot->val) > 2) {
       // Record new pot value
         ctrl->pot->val = currentPotValue;
         if (ctrl->is_on) {
-          transmitCtrlValue(ctrl);
+          transmitOnMessage(ctrl);
         }
       }
 
@@ -155,9 +153,9 @@ int main(void) {
           ctrl->btn->is_pressed = true;
           ctrl->is_on = !ctrl->is_on;
           if (ctrl->is_on) {
-            transmitCtrlValue(ctrl);
+            transmitOnMessage(ctrl);
           } else {
-            transmitCtrlOff(ctrl);
+            transmitOffMessage(ctrl);
           }
         }
         // Button is being held down so do nothing here
