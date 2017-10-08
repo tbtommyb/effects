@@ -139,7 +139,7 @@ int main(void) {
       Control* ctrl = controls[i];
 
       uint16_t currentPotValue = readADC(ctrl->pot->pin);
-      if (abs(currentPotValue - ctrl->pot->val) > 2) {
+      if (currentPotValue != ctrl->pot->val) {
       // Record new pot value
         ctrl->pot->val = currentPotValue;
         if (ctrl->is_on) {
