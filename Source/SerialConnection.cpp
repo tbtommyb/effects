@@ -15,6 +15,7 @@
 
 SerialConnection::SerialConnection() : Thread("serial connection"),
                                        ctrls{} {
+  // TODO - pass in as command line argument
   fd = serialOpen("/dev/ttyACM0", 115200);
   if (fd == -1) {
     std::cout << "Error opening device\n";
@@ -28,17 +29,9 @@ SerialConnection::~SerialConnection() {
   signalThreadShouldExit();
 };
 
-SerialConnection::SerialConnection(const SerialConnection& other) :
-  Thread("serial connection") {
-  fd = other.fd;
-  for (int i = 0; i < other.ctrls.size(); i++) {
-    ctrls.at(i) = other.ctrls.at(i);
-  }
-};
-
 void SerialConnection::run() {
   while (!threadShouldExit()) {
-    if (serialDataAvail(fd) > 0) {
+    if (serialDataAvail(fd) > 1) {
       const MessageManagerLock mml {Thread::getCurrentThread()};
 
       if (!mml.lockWasGained()) {
@@ -48,16 +41,25 @@ void SerialConnection::run() {
       unsigned int serialOutput { 0 };
 
       int lowerByte = serialGetchar(fd);
-      serialOutput = lowerByte;
+      if (lowerByte == -1) {
+        std::cout << "ERR: lower byte is -1\n";
+        continue;
+      }
       int upperByte = serialGetchar(fd);
-      serialOutput |= (upperByte << 8);
+      if (upperByte == -1) {
+        std::cout << "ERR: upper byte is -1\n";
+        continue;
+      }
+      serialOutput = (upperByte << 8) | lowerByte;
 
-      int id = (serialOutput & 0xF000) >> 12;
-      int val = serialOutput & 0x3FF;
-      bool isOn = (serialOutput & (1 << 10)) > 0;
+      int id = ID(serialOutput);
+      int val = VAL(serialOutput);
+      bool isOn = IS_ON(serialOutput);
 
       if (id < ctrls.size()) {
         ctrls.at(id)->update(val, isOn);
+      } else {
+        std::cout << "ERR: invalid ID: " << id << "\n";
       }
     }
   }
