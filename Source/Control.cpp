@@ -16,24 +16,11 @@ Control::Control(int id) : val(0),
   this->id = id;
 };
 
-Control::Control(const Control& other) {
-  id = other.id;
-  val = other.val;
-  isOn = other.isOn;
-};
-
-Control::~Control() { };
+Control::~Control() = default;
 
 void Control::update(int val, bool isOn) {
   this->val = val;
   this->isOn = isOn;
 
   sendChangeMessage();
-};
-
-Control& Control::operator=(Control rhs) {
-  id = rhs.id;
-  val = rhs.val;
-  isOn = rhs.isOn;
-  return *this;
 };
