@@ -27,10 +27,9 @@ public:
         setSize (800, 600);
 
         for (int i = 0; i < NUM_CTRLS; i++) {
-            std::shared_ptr<Control> ctrl(new Control(i));
+            auto ctrl = std::make_shared<Control>(i);
             conn.addControl(ctrl);
             ctrl->addChangeListener(this);
-            ctrls.push_back(ctrl);
         }
 
         conn.startThread();
@@ -107,7 +106,6 @@ private:
     // Your private member variables go here...
 
     SerialConnection conn;
-  std::vector<std::shared_ptr<Control>> ctrls;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 
