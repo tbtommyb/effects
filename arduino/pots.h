@@ -2,6 +2,7 @@
 #define CTRL_ON_BIT 10
 #define CTRL_OFF 0
 #define DEBOUNCE_TIME 1000  // microseconds
+#define MUX_MASK 0xe0
 
 #define ID_TAG(id) ((id) << 12)
 #define LOW_BYTE(w) ((uint8_t) ((w) & 0xff))
@@ -14,11 +15,10 @@ typedef struct _Pot Pot;
 typedef struct _Control Control;
 
 Control* newControl(uint16_t i);
-uint16_t pollPot(Pot* pot);
 bool isPressed(Button* btn);
 void initADC(void);
 uint16_t readADC(uint8_t channel);
-uint8_t debounce(uint8_t pin);
-void transmitCtrlValue(Control* ctrl);
-void transmitCtrlOff(Control* ctrl);
+bool debounce(uint8_t pin);
+void transmitOnMessage(Control* ctrl);
+void transmitOffMessage(Control* ctrl);
 void transmitWord(uint16_t value);

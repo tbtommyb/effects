@@ -29,8 +29,8 @@ until its potentiometer value changes or it is turned off:
 #include "USART.h"
 #include "pots.h"
 
-const int POT_PINS[NUM_CTRLS] = { PINC0, PINC1 };
-const int BUTTON_PINS[NUM_CTRLS] = { PIND4, PIND5 };
+const uint8_t POT_PINS[NUM_CTRLS] = { PINC0, PINC1 };
+const uint8_t BUTTON_PINS[NUM_CTRLS] = { PIND4, PIND5 };
 
 struct _Button {
   uint8_t pin;
@@ -67,8 +67,31 @@ Control* newControl(uint16_t i) {
   return ctrl;
 }
 
-uint16_t pollPot(Pot* pot) {
-  return readADC(pot->pin);
+// ADC
+
+void initADC(void) {
+  ADMUX |= (1 << REFS0);                 // reference voltage on AVCC
+  ADCSRA |= (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2); // ADC clock prescaler /128
+  ADCSRA |= (1 << ADEN);                 // enable ADC
+}
+
+uint16_t readADC(uint8_t pin) {
+  ADMUX = (MUX_MASK & ADMUX) | pin;      // set bottom five bits (the multiplexer)
+  ADCSRA |= (1 << ADSC);                 // start conversion
+  loop_until_bit_is_clear(ADCSRA, ADSC); // wait until conversion is done
+  return (ADC);
+}
+
+// Buttons
+
+bool debounce(uint8_t pin) {
+  if (bit_is_clear(BUTTON_PIN, pin)) {      // button is pressed now
+    _delay_us(DEBOUNCE_TIME);
+    if (bit_is_clear(BUTTON_PIN, pin)) {    // still pressed
+      return true;
+    }
+  }
+  return false;
 }
 
 bool isPressed(Button* btn) {
@@ -78,41 +101,16 @@ bool isPressed(Button* btn) {
   return false;
 }
 
-// ADC
+// Transmitting messages
 
-void initADC(void) {
-  ADMUX |= (1 << REFS0);                 // reference voltage on AVCC
-  ADCSRA |= (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2); // ADC clock prescaler /128
-  ADCSRA |= (1 << ADEN);                 // enable ADC
-}
-
-uint16_t readADC(uint8_t channel) {
-  ADMUX = (0xf0 & ADMUX) | channel;      // set bottom four bits (the multiplexer)
-  ADCSRA |= (1 << ADSC);                 // start conversion
-  loop_until_bit_is_clear(ADCSRA, ADSC); // wait until conversion is done
-  return (ADC);
-}
-
-// Utilities
-
-uint8_t debounce(uint8_t pin) {
-  if (bit_is_clear(BUTTON_PIN, pin)) {      // button is pressed now
-    _delay_us(DEBOUNCE_TIME);
-    if (bit_is_clear(BUTTON_PIN, pin)) {    // still pressed
-      return (1);
-    }
-  }
-  return 0;
-}
-
-void transmitCtrlValue(Control* ctrl) {
+void transmitOnMessage(Control* ctrl) {
   // Submit ctrl ID in top four, ON bit set and pot value in bottom ten
   uint16_t output = ID_TAG(ctrl->id) | (1 << CTRL_ON_BIT) | ctrl->pot->val;
   transmitWord(output);
 }
 
-void transmitCtrlOff(Control* ctrl) {
-  // Simply submit ctrl ID top four bits, rest empty
+void transmitOffMessage(Control* ctrl) {
+  // Submit ctrl ID top four bits, rest empty
   uint16_t output = ID_TAG(ctrl->id) | CTRL_OFF;
   transmitWord(output);
 }
@@ -137,15 +135,15 @@ int main(void) {
   // -------- Main loop -------- //
   while (1) {
 
-    for (uint16_t i = 0; i < NUM_CTRLS; i++) {
+    for (uint8_t i = 0; i < NUM_CTRLS; i++) {
       Control* ctrl = controls[i];
 
-      uint16_t currentPotValue = pollPot(ctrl->pot);
-      if (abs(currentPotValue - ctrl->pot->val) > 2) {
+      uint16_t currentPotValue = readADC(ctrl->pot->pin);
+      if (currentPotValue != ctrl->pot->val) {
       // Record new pot value
         ctrl->pot->val = currentPotValue;
         if (ctrl->is_on) {
-          transmitCtrlValue(ctrl);
+          transmitOnMessage(ctrl);
         }
       }
 
@@ -155,9 +153,9 @@ int main(void) {
           ctrl->btn->is_pressed = true;
           ctrl->is_on = !ctrl->is_on;
           if (ctrl->is_on) {
-            transmitCtrlValue(ctrl);
+            transmitOnMessage(ctrl);
           } else {
-            transmitCtrlOff(ctrl);
+            transmitOffMessage(ctrl);
           }
         }
         // Button is being held down so do nothing here

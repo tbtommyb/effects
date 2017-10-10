@@ -16,8 +16,10 @@ class Control : public ChangeBroadcaster
 {
 public:
   Control(int id);
+  Control(const Control& other);
   ~Control();
   void update(int val, bool isOn);
+  Control& operator=(Control rhs);
   int id;
   int val;
   bool isOn;
