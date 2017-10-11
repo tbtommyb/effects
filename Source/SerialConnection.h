@@ -16,6 +16,7 @@
 #define ID(input) ((input & 0xF000) >> 12)
 #define VAL(input) (input & 0x3FF)
 #define IS_ON(input) ((input & (1 << 10)) > 0)
+#define MAX_VAL 1023.0;
 
 class SerialConnection : public Thread
 {

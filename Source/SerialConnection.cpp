@@ -56,7 +56,7 @@ void SerialConnection::run()
       serialOutput = (upperByte << 8) | lowerByte;
 
       int id = ID(serialOutput);
-      int val = VAL(serialOutput);
+      float val = VAL(serialOutput) / MAX_VAL;
       bool isOn = IS_ON(serialOutput);
 
       if (id < ctrls.size()) {

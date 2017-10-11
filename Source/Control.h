@@ -17,8 +17,8 @@ class Control : public ChangeBroadcaster
 public:
   Control(int id);
   ~Control();
-  void update(int val, bool isOn);
+  void update(float val, bool isOn);
   int id;
-  int val;
+  float val;
   bool isOn;
 };
