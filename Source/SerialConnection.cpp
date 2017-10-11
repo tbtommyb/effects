@@ -14,7 +14,8 @@
 #include <wiringSerial.h>
 
 SerialConnection::SerialConnection() : Thread("serial connection"),
-                                       ctrls{} {
+                                       ctrls{}
+{
   // TODO - pass in as command line argument
   fd = serialOpen("/dev/ttyACM0", 115200);
   if (fd == -1) {
@@ -24,12 +25,14 @@ SerialConnection::SerialConnection() : Thread("serial connection"),
   wiringPiSetup();
 };
 
-SerialConnection::~SerialConnection() {
+SerialConnection::~SerialConnection()
+{
   serialClose(fd);
   signalThreadShouldExit();
 };
 
-void SerialConnection::run() {
+void SerialConnection::run()
+{
   while (!threadShouldExit()) {
     if (serialDataAvail(fd) > 1) {
       const MessageManagerLock mml {Thread::getCurrentThread()};
@@ -65,6 +68,7 @@ void SerialConnection::run() {
   }
 };
 
-void SerialConnection::addControl(std::unique_ptr<Control> ctrl) {
+void SerialConnection::addControl(std::unique_ptr<Control> ctrl)
+{
   ctrls.push_back(std::move(ctrl));
 };

@@ -12,13 +12,15 @@
 
 Control::Control(int id) : val(0),
                            isOn(false),
-                           ChangeBroadcaster() {
+                           ChangeBroadcaster()
+{
   this->id = id;
 };
 
 Control::~Control() = default;
 
-void Control::update(int val, bool isOn) {
+void Control::update(int val, bool isOn)
+{
   this->val = val;
   this->isOn = isOn;
 
