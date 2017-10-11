@@ -22,7 +22,7 @@ class MainContentComponent   : public AudioAppComponent,
 {
 public:
     //==============================================================================
-  MainContentComponent() : conn(SerialConnection())
+  MainContentComponent() : conn()
     {
         setSize (800, 600);
 

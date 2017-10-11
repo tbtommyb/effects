@@ -21,11 +21,14 @@ class SerialConnection : public Thread
 {
  public:
   SerialConnection();
-  SerialConnection(const SerialConnection&);
+  SerialConnection(const SerialConnection& other) = delete;
+  SerialConnection(SerialConnection&& other) = delete;
+  SerialConnection& operator=(const SerialConnection& other) = delete;
+  SerialConnection& operator=(SerialConnection&& other) = delete;
   ~SerialConnection();
   void run() override;
-  void addControl(std::shared_ptr<Control> ctrl);
+  void addControl(std::unique_ptr<Control> ctrl);
  private:
-  std::vector<std::shared_ptr<Control>> ctrls;
+  std::vector<std::unique_ptr<Control>> ctrls;
   int fd;
 };
