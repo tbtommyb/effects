@@ -7,20 +7,32 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Control.h"
+#include "SerialConnection.h"
+
+#define NUM_CTRLS 2
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent   : public AudioAppComponent
+class MainContentComponent   : public AudioAppComponent,
+                               public ChangeListener
 {
 public:
     //==============================================================================
-    MainContentComponent()
+  MainContentComponent() : conn()
     {
         setSize (800, 600);
 
+        for (int i = 0; i < NUM_CTRLS; i++) {
+            auto ctrl = std::make_unique<Control>(i);
+            ctrl->addChangeListener(this);
+            conn.addControl(std::move(ctrl));
+        }
+
+        conn.startThread();
         // specify the number of input and output channels that we want to open
         setAudioChannels (2, 2);
     }
@@ -77,16 +89,25 @@ public:
         // update their positions.
     }
 
+    void changeListenerCallback(ChangeBroadcaster* source) override
+    {
+        if (const Control* ctrl = dynamic_cast<const Control*> (source)) {
+          std::cout << "id: " << ctrl->id << "\n";
+          std::cout << "val: " << ctrl->val << "\n";
+          std::cout << "isOn: " << ctrl->isOn << "\n";
+        } else {
+            std::cout << "Unknown callback source\n";
+        }
+    }
 
 private:
     //==============================================================================
 
     // Your private member variables go here...
 
-
+    SerialConnection conn;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
-
 
 // (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()     { return new MainContentComponent(); }
