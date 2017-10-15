@@ -28,8 +28,8 @@ class SerialConnection : public Thread
   SerialConnection& operator=(SerialConnection&& other) = delete;
   ~SerialConnection();
   void run() override;
-  void addControl(std::unique_ptr<Control> ctrl);
+  void addControl(std::shared_ptr<Control> ctrl);
  private:
-  std::vector<std::unique_ptr<Control>> ctrls;
+  std::vector<std::shared_ptr<Control>> ctrls;
   int fd;
 };

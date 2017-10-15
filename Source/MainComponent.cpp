@@ -27,9 +27,9 @@ public:
         setSize (800, 600);
 
         for (int i = 0; i < NUM_CTRLS; i++) {
-            auto ctrl = std::make_unique<Control>(i);
+            auto ctrl = std::make_shared<Control>(i);
             ctrl->addChangeListener(this);
-            conn.addControl(std::move(ctrl));
+            conn.addControl(ctrl);
         }
 
         conn.startThread();

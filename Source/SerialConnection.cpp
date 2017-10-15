@@ -68,7 +68,7 @@ void SerialConnection::run()
   }
 };
 
-void SerialConnection::addControl(std::unique_ptr<Control> ctrl)
+void SerialConnection::addControl(std::shared_ptr<Control> ctrl)
 {
   ctrls.push_back(std::move(ctrl));
 };
