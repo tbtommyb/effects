@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "Control.h"
 
 class AudioEffect
@@ -22,7 +23,7 @@ public:
   AudioEffect(AudioEffect&& other) = delete;
   AudioEffect& operator=(const AudioEffect& other) = delete;
   AudioEffect& operator=(AudioEffect&& other) = delete;
-  virtual void processBlock(AudioSourceChannelInfo& bufferToFill);
+  virtual void processBlock(const AudioSourceChannelInfo& bufferToFill);
 protected:
   std::shared_ptr<Control> ctrl;
 };

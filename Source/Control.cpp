@@ -11,8 +11,7 @@
 #include "Control.h"
 
 Control::Control(int id) : val(0.0),
-                           isOn(false),
-                           ChangeBroadcaster()
+                           isOn(false)
 {
   this->id = id;
 };
@@ -24,5 +23,4 @@ void Control::update(float val, bool isOn)
   this->val = val;
   this->isOn = isOn;
 
-  sendChangeMessage();
 };

@@ -10,9 +10,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-
-class Control : public ChangeBroadcaster
+class Control
 {
 public:
   Control(int id);

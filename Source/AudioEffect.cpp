@@ -12,4 +12,4 @@
 
 AudioEffect::AudioEffect(std::shared_ptr<Control> ctrl) : ctrl(ctrl) { }
 AudioEffect::~AudioEffect() = default;
-void AudioEffect::processBlock(AudioSourceChannelInfo& bufferToFill) { }
+void AudioEffect::processBlock(const AudioSourceChannelInfo& bufferToFill) { }

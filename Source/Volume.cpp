@@ -14,8 +14,9 @@ Volume::Volume(std::shared_ptr<Control> ctrl) : AudioEffect(ctrl) { }
 
 Volume::~Volume() = default;
 
-void Volume::processBlock(AudioSourceChannelInfo& bufferToFill)
+void Volume::processBlock(const AudioSourceChannelInfo& bufferToFill)
 {
+  if (!ctrl->isOn) { return; }
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
     auto channelData = bufferToFill.buffer->getWritePointer(chan, bufferToFill.startSample);

@@ -9,6 +9,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Control.h"
 #include "SerialConnection.h"
+#include "Volume.h"
+#include "AudioEffect.h"
 
 #define NUM_CTRLS 2
 
@@ -17,19 +19,20 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent   : public AudioAppComponent,
-                               public ChangeListener
+class MainContentComponent   : public AudioAppComponent
 {
 public:
     //==============================================================================
-  MainContentComponent() : conn()
+  MainContentComponent() : conn(),
+                           effects{}
     {
         setSize (800, 600);
 
         for (int i = 0; i < NUM_CTRLS; i++) {
             auto ctrl = std::make_shared<Control>(i);
-            ctrl->addChangeListener(this);
+            auto volume = std::make_shared<Volume>(ctrl);
             conn.addControl(ctrl);
+            effects.push_back(std::move(volume));
         }
 
         conn.startThread();
@@ -56,13 +59,11 @@ public:
 
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
     {
-        // Your audio-processing code goes here!
-
-        // For more details, see the help for AudioProcessor::getNextAudioBlock()
-
-        // Right now we are not producing any data, in which case we need to clear the buffer
-        // (to prevent the output of random noise)
-        bufferToFill.clearActiveBufferRegion();
+        for (int i = 0; i < effects.size(); i++)
+        {
+            auto&& effect = effects.at(i);
+            effect->processBlock(bufferToFill);
+        }
     }
 
     void releaseResources() override
@@ -89,23 +90,13 @@ public:
         // update their positions.
     }
 
-    void changeListenerCallback(ChangeBroadcaster* source) override
-    {
-        if (const Control* ctrl = dynamic_cast<const Control*> (source)) {
-          std::cout << "id: " << ctrl->id << "\n";
-          std::cout << "val: " << ctrl->val << "\n";
-          std::cout << "isOn: " << ctrl->isOn << "\n";
-        } else {
-            std::cout << "Unknown callback source\n";
-        }
-    }
-
 private:
     //==============================================================================
 
     // Your private member variables go here...
 
     SerialConnection conn;
+    std::vector<std::shared_ptr<AudioEffect>> effects;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 
