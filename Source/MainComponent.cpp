@@ -10,6 +10,7 @@
 #include "Control.h"
 #include "SerialConnection.h"
 #include "Volume.h"
+#include "Delay.h"
 #include "AudioEffect.h"
 
 //==============================================================================
@@ -26,9 +27,9 @@ public:
     {
         setSize (800, 600);
 
-        auto volume = std::make_shared<Volume>();
-        conn.registerEffect(volume);
-        effects.push_back(std::move(volume));
+        auto delay = std::make_shared<Delay>();
+        conn.registerEffect(delay);
+        effects.push_back(std::move(delay));
 
         conn.startThread();
         // specify the number of input and output channels that we want to open
@@ -50,6 +51,8 @@ public:
         // but be careful - it will be called on the audio thread, not the GUI thread.
 
         // For more details, see the help for AudioProcessor::prepareToPlay()
+        auto delay = std::static_pointer_cast<Delay>(effects.at(1));
+        delay->setupBlock(sampleRate);
     }
 
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
@@ -87,9 +90,6 @@ public:
 
 private:
     //==============================================================================
-
-    // Your private member variables go here...
-
     SerialConnection conn;
     std::vector<std::shared_ptr<AudioEffect>> effects;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)

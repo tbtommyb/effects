@@ -32,7 +32,7 @@ class SerialConnection : public Thread
   void registerEffect(std::shared_ptr<AudioEffect> effect);
  private:
   void initialiseControls();
-  const int numCtrls = 2;
+  const int numCtrls = 6;
   std::vector<std::shared_ptr<Control>> ctrls;
   int fd;
 };
