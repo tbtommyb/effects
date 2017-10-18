@@ -34,7 +34,7 @@ SerialConnection::~SerialConnection()
 
 void SerialConnection::initialiseControls()
 {
-  for (int i = 0; i < numCtrls - 1; i++)
+  for (int i = 0; i < numCtrls; i++)
   {
     ctrls.push_back(std::make_shared<Control>(i));
   }
