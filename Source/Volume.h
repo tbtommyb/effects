@@ -16,7 +16,7 @@
 class Volume : public AudioEffect
 {
 public:
-  Volume(std::shared_ptr<Control> ctrl);
+  Volume();
   ~Volume();
   void processBlock(const AudioSourceChannelInfo& bufferToFill) override;
 };

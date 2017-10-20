@@ -9,21 +9,28 @@
 */
 
 #include "Volume.h"
+#include "EffectParameter.h"
 
-Volume::Volume(std::shared_ptr<Control> ctrl) : AudioEffect(ctrl) { }
+Volume::Volume() : AudioEffect()
+{
+  addParameter(std::make_shared<EffectParameter>("level", 0));
+}
 
 Volume::~Volume() = default;
 
 void Volume::processBlock(const AudioSourceChannelInfo& bufferToFill)
 {
-  if (!ctrl->isOn) { return; }
+  auto level = parameters.at("level");
+
+  if (!level->isOn) { return; }
+
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
     auto channelData = bufferToFill.buffer->getWritePointer(chan, bufferToFill.startSample);
 
     for (int i = 0; i < bufferToFill.numSamples; i++)
     {
-      channelData[i] = channelData[i] * ctrl->val;
+      channelData[i] = channelData[i] * level->val;
     }
   }
 }
