@@ -12,8 +12,6 @@
 #include "Volume.h"
 #include "AudioEffect.h"
 
-#define NUM_CTRLS 2
-
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -28,12 +26,9 @@ public:
     {
         setSize (800, 600);
 
-        for (int i = 0; i < NUM_CTRLS; i++) {
-            auto ctrl = std::make_shared<Control>(i);
-            auto volume = std::make_shared<Volume>(ctrl);
-            conn.addControl(ctrl);
-            effects.push_back(std::move(volume));
-        }
+        auto volume = std::make_shared<Volume>();
+        conn.registerEffect(volume);
+        effects.push_back(std::move(volume));
 
         conn.startThread();
         // specify the number of input and output channels that we want to open
@@ -61,7 +56,7 @@ public:
     {
         for (int i = 0; i < effects.size(); i++)
         {
-            auto&& effect = effects.at(i);
+            auto&& effect = effects[i];
             effect->processBlock(bufferToFill);
         }
     }

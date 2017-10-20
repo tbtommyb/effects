@@ -10,20 +10,20 @@
 
 #pragma once
 
+#include <map>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Control.h"
+#include "EffectParameter.h"
 
 class AudioEffect
 {
 public:
-  AudioEffect(std::shared_ptr<Control> ctrl);
   AudioEffect();
   ~AudioEffect();
-  AudioEffect(const AudioEffect& other) = delete;
-  AudioEffect(AudioEffect&& other) = delete;
-  AudioEffect& operator=(const AudioEffect& other) = delete;
-  AudioEffect& operator=(AudioEffect&& other) = delete;
+  void addParameter(std::shared_ptr<EffectParameter> parameter);
   virtual void processBlock(const AudioSourceChannelInfo& bufferToFill);
+  typedef std::map<std::string, std::shared_ptr<EffectParameter>> parameterMap;
+  parameterMap& getParameters();
 protected:
-  std::shared_ptr<Control> ctrl;
+  parameterMap parameters;
 };

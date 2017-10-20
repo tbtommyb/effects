@@ -9,7 +9,18 @@
 */
 
 #include "AudioEffect.h"
+#include "EffectParameter.h"
 
-AudioEffect::AudioEffect(std::shared_ptr<Control> ctrl) : ctrl(ctrl) { }
+AudioEffect::AudioEffect() : parameters() { }
 AudioEffect::~AudioEffect() = default;
+
+void AudioEffect::addParameter(std::shared_ptr<EffectParameter> parameter)
+{
+  parameters.insert({parameter->label, parameter});
+}
+
 void AudioEffect::processBlock(const AudioSourceChannelInfo& bufferToFill) { }
+
+AudioEffect::parameterMap& AudioEffect::getParameters() {
+  return parameters;
+};

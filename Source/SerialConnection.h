@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Control.h"
+#include "AudioEffect.h"
 
 #define ID(input) ((input & 0xF000) >> 12)
 #define VAL(input) (input & 0x3FF)
@@ -28,8 +29,10 @@ class SerialConnection : public Thread
   SerialConnection& operator=(SerialConnection&& other) = delete;
   ~SerialConnection();
   void run() override;
-  void addControl(std::shared_ptr<Control> ctrl);
+  void registerEffect(std::shared_ptr<AudioEffect> effect);
  private:
+  void initialiseControls();
+  const int numCtrls = 2;
   std::vector<std::shared_ptr<Control>> ctrls;
   int fd;
 };

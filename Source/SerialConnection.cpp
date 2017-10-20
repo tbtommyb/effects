@@ -23,12 +23,30 @@ SerialConnection::SerialConnection() : Thread("serial connection"),
     exit(EXIT_FAILURE);
   }
   wiringPiSetup();
+  initialiseControls();
 };
 
 SerialConnection::~SerialConnection()
 {
   serialClose(fd);
   signalThreadShouldExit();
+};
+
+void SerialConnection::initialiseControls()
+{
+  for (int i = 0; i < numCtrls - 1; i++)
+  {
+    ctrls.push_back(std::make_shared<Control>(i));
+  }
+};
+
+void SerialConnection::registerEffect(std::shared_ptr<AudioEffect> effect)
+{
+  for (auto const kv : effect->getParameters())
+  {
+    auto parameter = kv.second;
+    ctrls.at(parameter->id)->addChangeListener(parameter.get());
+  }
 };
 
 void SerialConnection::run()
@@ -66,9 +84,4 @@ void SerialConnection::run()
       }
     }
   }
-};
-
-void SerialConnection::addControl(std::shared_ptr<Control> ctrl)
-{
-  ctrls.push_back(std::move(ctrl));
 };
