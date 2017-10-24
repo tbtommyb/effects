@@ -51,7 +51,7 @@ public:
         // but be careful - it will be called on the audio thread, not the GUI thread.
 
         // For more details, see the help for AudioProcessor::prepareToPlay()
-        auto delay = std::static_pointer_cast<Delay>(effects.at(1));
+        auto delay = std::static_pointer_cast<Delay>(effects.at(0));
         delay->setupBlock(sampleRate);
     }
 
