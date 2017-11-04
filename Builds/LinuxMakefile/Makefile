@@ -66,6 +66,9 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/EffectParameter_4c8ae579.o \
+  $(JUCE_OBJDIR)/Volume_ccd2e9a3.o \
+  $(JUCE_OBJDIR)/AudioEffect_232047e8.o \
   $(JUCE_OBJDIR)/Control_9e19bf3e.o \
   $(JUCE_OBJDIR)/Delay_82360b64.o \
   $(JUCE_OBJDIR)/SerialConnection_1451557b.o \
@@ -95,6 +98,21 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : check-pkg-config $(OBJECTS_APP) $(RESOURCES)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/EffectParameter_4c8ae579.o: ../../Source/EffectParameter.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling EffectParameter.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/Volume_ccd2e9a3.o: ../../Source/Volume.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling Volume.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/AudioEffect_232047e8.o: ../../Source/AudioEffect.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling AudioEffect.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/Control_9e19bf3e.o: ../../Source/Control.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
