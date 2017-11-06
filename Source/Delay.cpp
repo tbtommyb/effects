@@ -32,29 +32,34 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
   if (!levelParam->isOn) { return; }
 
   int numSamples = delayBuffer.getNumSamples();
-  int delayLength = lengthParam->val * numSamples;
+  float delayLength = lengthParam->val * numSamples;
+  int base = (int) std::floor(delayLength);
+  float fraction = delayLength - base;
 
-  int currentDelayPos = 0;
+  int currentWritePos = 0;
 
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
     auto channelData = bufferToFill.buffer->getWritePointer(chan);
     auto delayData = delayBuffer.getWritePointer(chan);
+    /* auto delayData = delayBuffer.getWritePointer(chan, delayPosition); */
 
-    currentDelayPos = delayPosition;
+    currentWritePos = delayPosition;
+    int currentReadPos = base;
 
     for (int i = 0; i < bufferToFill.numSamples; i++)
     {
       auto in = channelData[i];
-      channelData[i] += delayData[currentDelayPos];
-      delayData[currentDelayPos] = (delayData[currentDelayPos] + in) * levelParam->val;
+      channelData[i] = fraction * delayData[currentReadPos] + (1 - fraction) * delayData[currentReadPos + 1];
+      delayData[currentWritePos] = (delayData[currentWritePos] + in) * levelParam->val;
 
-      currentDelayPos++;
-      if (currentDelayPos >= delayLength)
+      currentWritePos++;
+      currentReadPos++;
+      if (currentWritePos >= numSamples)
       {
-        currentDelayPos = 0;
+        currentWritePos = 0;
       }
     }
   }
-  delayPosition = currentDelayPos;
+  delayPosition = currentWritePos;
 }
