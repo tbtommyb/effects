@@ -33,33 +33,40 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
 
   int numSamples = delayBuffer.getNumSamples();
   float delayLength = lengthParam->val * numSamples;
-  int base = (int) std::floor(delayLength);
-  float fraction = delayLength - base;
 
-  int currentWritePos = 0;
+  int writePos = 0;
 
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
     auto channelData = bufferToFill.buffer->getWritePointer(chan);
-    auto delayData = delayBuffer.getWritePointer(chan);
-    /* auto delayData = delayBuffer.getWritePointer(chan, delayPosition); */
+    auto delayData = delayBuffer.getWritePointer(chan, delayPosition);
 
-    currentWritePos = delayPosition;
-    int currentReadPos = base;
+    writePos = delayPosition;
 
     for (int i = 0; i < bufferToFill.numSamples; i++)
     {
-      auto in = channelData[i];
-      channelData[i] = fraction * delayData[currentReadPos] + (1 - fraction) * delayData[currentReadPos + 1];
-      delayData[currentWritePos] = (delayData[currentWritePos] + in) * levelParam->val;
+      float readPos = writePos - delayLength;
 
-      currentWritePos++;
-      currentReadPos++;
-      if (currentWritePos >= numSamples)
+      if (readPos < 0) { readPos += numSamples; }
+
+      int baseIndex = (int) std::floor(readPos);
+      float fraction = readPos - baseIndex;
+
+      auto in = channelData[i];
+
+      // Linearly interpolate between two samples
+      auto output = delayData[baseIndex] + ((delayData[baseIndex + 1] - delayData[baseIndex]) * fraction);
+      channelData[i] += output;
+
+      // Write output back into delay line
+      delayData[writePos] = in + (output * levelParam-> val);
+
+      writePos++;
+      if (writePos >= numSamples)
       {
-        currentWritePos = 0;
+        writePos = 0;
       }
     }
   }
-  delayPosition = currentWritePos;
+  delayPosition = writePos;
 }
