@@ -7,7 +7,6 @@
 
   ==============================================================================
 */
-
 #include "Delay.h"
 #include "EffectParameter.h"
 
@@ -32,25 +31,25 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
   if (!levelParam->isOn) { return; }
 
   int numSamples = delayBuffer.getNumSamples();
-  float delayLength = lengthParam->val * numSamples;
+  float delayLength = lengthParam->val * (float) numSamples;
 
   int writePos = 0;
 
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
     auto channelData = bufferToFill.buffer->getWritePointer(chan);
-    auto delayData = delayBuffer.getWritePointer(chan, delayPosition);
+    auto delayData = delayBuffer.getWritePointer(chan);
 
     writePos = delayPosition;
 
     for (int i = 0; i < bufferToFill.numSamples; i++)
     {
-      float readPos = writePos - delayLength;
+      float readPos = (float) writePos - delayLength;
 
-      if (readPos < 0) { readPos += numSamples; }
+      if (readPos < 0.0) { readPos += numSamples; }
 
       int baseIndex = (int) std::floor(readPos);
-      float fraction = readPos - baseIndex;
+      float fraction = readPos - (float) baseIndex;
 
       auto in = channelData[i];
 
@@ -59,7 +58,7 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
       channelData[i] += output;
 
       // Write output back into delay line
-      delayData[writePos] = in + (output * levelParam-> val);
+      delayData[writePos] = (in + output) * levelParam->val;
 
       writePos++;
       if (writePos >= numSamples)
