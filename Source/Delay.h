@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
+
 #include "Control.h"
 #include "AudioEffect.h"
 
@@ -23,5 +25,6 @@ class Delay : public AudioEffect
   private:
     AudioBuffer<float> delayBuffer;
     int delayPosition = 0;
-    float lineLength = 2.0;
+    float lineLength = 0.5;
+    float currentSampleRate = 0.0;
 };

@@ -20,7 +20,13 @@ Delay::~Delay() = default;
 
 void Delay::setupBlock(double sampleRate)
 {
-  delayBuffer.setSize(2, lineLength * sampleRate);
+  if (sampleRate != currentSampleRate) {
+    currentSampleRate = sampleRate;
+    delayBuffer.setSize(2, lineLength * currentSampleRate);
+    for (auto parameter : parameters) {
+      parameter.second->setup(currentSampleRate);
+    }
+  }
 };
 
 void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
@@ -28,10 +34,10 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
   auto levelParam = parameters.at("level");
   auto lengthParam = parameters.at("length");
 
-  if (!levelParam->isOn) { return; }
+  if (!levelParam->getIsOn()) { return; }
 
   int numSamples = delayBuffer.getNumSamples();
-  float delayLength = lengthParam->val * (float) numSamples;
+  float delayLength = lengthParam->getVal() * (float) numSamples;
 
   int writePos = 0;
 
@@ -58,7 +64,7 @@ void Delay::processBlock(const AudioSourceChannelInfo& bufferToFill)
       channelData[i] += output;
 
       // Write output back into delay line
-      delayData[writePos] = (in + output) * levelParam->val;
+      delayData[writePos] = (in + output) * levelParam->getVal();
 
       writePos++;
       if (writePos >= numSamples)

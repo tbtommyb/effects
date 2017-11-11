@@ -29,8 +29,23 @@ void EffectParameter::changeListenerCallback(ChangeBroadcaster* source)
   }
 };
 
+void EffectParameter::setup(float sampleRate)
+{
+  val.reset(sampleRate, rampTimeInSeconds);
+};
+
+float EffectParameter::getVal()
+{
+  return val.getNextValue();
+};
+
+bool EffectParameter::getIsOn()
+{
+  return isOn;
+};
+
 void EffectParameter::update(float val, bool isOn)
 {
-  this->val = val;
+  this->val.setValue(val);
   this->isOn = isOn;
 };

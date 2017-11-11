@@ -21,9 +21,13 @@ public:
   ~EffectParameter();
   void changeListenerCallback(ChangeBroadcaster* source) override;
   std::string label;
-  float val;
-  bool isOn;
   int id;
-private:
+  float getVal();
+  bool getIsOn();
+  void setup(float sampleRate);
   void update(float val, bool isOn);
+private:
+  LinearSmoothedValue<float> val;
+  bool isOn;
+  float rampTimeInSeconds = 0.01;
 };
