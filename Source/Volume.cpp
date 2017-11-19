@@ -22,7 +22,7 @@ void Volume::processBlock(const AudioSourceChannelInfo& bufferToFill)
 {
   auto level = parameters.at("level");
 
-  if (!level->isOn) { return; }
+  if (!level->getIsOn()) { return; }
 
   for (int chan = 0; chan < bufferToFill.buffer->getNumChannels(); chan++)
   {
@@ -30,7 +30,7 @@ void Volume::processBlock(const AudioSourceChannelInfo& bufferToFill)
 
     for (int i = 0; i < bufferToFill.numSamples; i++)
     {
-      channelData[i] = channelData[i] * level->val;
+        channelData[i] = channelData[i] * level->getVal();
     }
   }
 }
