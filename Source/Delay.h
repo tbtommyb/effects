@@ -25,6 +25,6 @@ class Delay : public AudioEffect
   private:
     AudioBuffer<float> delayBuffer;
     int delayPosition = 0;
-    float lineLength = 0.5;
+    float lineLength = 0.25;
     float currentSampleRate = 0.0;
 };
